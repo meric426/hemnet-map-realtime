@@ -6,6 +6,7 @@ var socketio = require('socket.io'),
     adapter = require('socket.io-redis'),
     util = require('util'),
     duration = require('duration'),
+    colors = require('colors'), // jshint ignore:line
     winston = require('winston');
 
 /**
