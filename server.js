@@ -29,7 +29,7 @@ io.on('connection', function(socket) {
     winston.log('info', 'client connected'.green, socket.id);
 
     socket.simulate = setInterval(function() {
-        socket.emit('date', new Date());
+        socket.emit('coords', { lat: Math.random() * 14 + 55, lng: Math.random() * 12 + 11 });
     }, 1000);
 
     socket.on('disconnect', function() {
