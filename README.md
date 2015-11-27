@@ -1,1 +1,8 @@
-# hemnet-map-realtime
+# Requirements
+
+* redis
+
+# Setup
+
+* `npm install`
+* `npm run start`
