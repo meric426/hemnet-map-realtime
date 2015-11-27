@@ -28,10 +28,6 @@ winston.log('info', 'server listening on port', 4000);
 io.on('connection', function(socket) {
     winston.log('info', 'client connected'.green, socket.id);
 
-    socket.simulate = setInterval(function() {
-        socket.emit('coords', { lat: Math.random() * 14 + 55, lng: Math.random() * 12 + 11 });
-    }, 1000);
-
     socket.on('disconnect', function() {
         var dur = duration(new Date(socket.handshake.time), new Date()),
             session_length_str = util.format('(session length: %s)', dur.toString(1, 1));
