@@ -1,7 +1,7 @@
 # Requirements
 
 * redis
-* access to www.hemnet.se production environment (sorry :()
+* access to www.hemnet.se production environment :(
 
 # Setup
 
