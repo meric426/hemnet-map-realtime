@@ -3,7 +3,6 @@
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
 var socketio = require('socket.io'),
-    adapter = require('socket.io-redis'),
     util = require('util'),
     duration = require('duration'),
     colors = require('colors'), // jshint ignore:line
@@ -21,7 +20,6 @@ var winston = new(winston.Logger)({
 });
 
 var io = socketio(4000);
-io.adapter(adapter({ host: '127.0.0.1', port: 6379 }));
 
 winston.log('info', 'server listening on port', 4000);
 
