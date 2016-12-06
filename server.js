@@ -56,7 +56,7 @@ connection.on('error', function(e) {
   console.log('Error from amqp: ', e);
 });
 
-var center_sql = "ST_Transform(ST_SetSRID(ST_PointOnSurface(the_geom),3006),4326)"
+var center_sql = "ST_Transform(ST_SetSRID(ST_PointOnSurface(lg.the_geom),3006),4326)"
 
 connection.on('ready', function() {
   connection.queue('realtime-viz', {
@@ -79,7 +79,7 @@ connection.on('ready', function() {
             return console.error('error fetching client from pool', err);
           }
 
-          client.query('SELECT ST_Y('+ center_sql +') AS lat, ST_X('+ center_sql +') AS lng FROM locations WHERE id IN ('+ ids.join(',') +')', function(err, result) {
+          client.query('SELECT ST_Y('+ center_sql +') AS lat, ST_X('+ center_sql +') AS lng FROM locations l JOIN location_geometries lg ON lg.location_id = l.id WHERE l.id IN ('+ ids.join(',') +')', function(err, result) {
             done();
 
             if (err) {
