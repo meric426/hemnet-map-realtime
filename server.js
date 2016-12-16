@@ -50,16 +50,17 @@ var broadcast = function(event, data) {
 
 var amqp = require('amqp');
 var msgpack = require('msgpack');
-var connection = amqp.createConnection({ host: '127.0.0.1', port: 5673 });
 
-connection.on('error', function(e) {
+var searches_connection = amqp.createConnection({ host: '127.0.0.1', port: 5673 });
+
+searches_connection.on('error', function(e) {
   console.log('Error from amqp: ', e);
 });
 
 var center_sql = "ST_Transform(ST_SetSRID(ST_PointOnSurface(lg.the_geom),3006),4326)"
 
-connection.on('ready', function() {
-  connection.queue('realtime-viz', {
+searches_connection.on('ready', function() {
+  searches_connection.queue('realtime-viz', {
     durable: true,
     autoDelete: false,
     arguments: {
@@ -99,6 +100,56 @@ connection.on('ready', function() {
           });
         });
       }
+    });
+  });
+});
+
+var tally_connection = amqp.createConnection({ host: '127.0.0.1', port: 5674 });
+
+tally_connection.on('error', function(e) {
+  console.log('Error from amqp: ', e);
+});
+
+tally_connection.on('ready', function() {
+  tally_connection.queue('tally_queue_dup_ttl', {
+    durable: true,
+    autoDelete: false,
+    arguments: {
+      'x-message-ttl': 5000
+    }
+  }, function(q) {
+    q.bind('#');
+    q.subscribe(function(message) {
+      var tally = JSON.parse(message.data).key;
+
+      if (tally.tallied_type != "Objekt"){ return }
+
+
+      pg.connect(conString, function(err, client, done) {
+        if (err) {
+          return console.error('error fetching client from pool', err);
+        }
+
+        client.query('SELECT ST_Y(ST_Transform(ST_SetSRID(ST_Point(xkoordinat, ykoordinat),3006),4326)) AS lat, ST_X(ST_Transform(ST_SetSRID(ST_Point(xkoordinat, ykoordinat),3006),4326)) AS lng FROM objekts WHERE id = '+ tally.tallied_id, function(err, result) {
+          done();
+
+          if (err) {
+            return console.error('error running query', err);
+          }
+
+          if (result.rows.length) {
+            var row = result.rows[0];
+
+            if (row.lat && row.lng) {
+              broadcast('coords', {
+                type: 'objekt',
+                lat: row.lat,
+                lng: row.lng
+              })
+            }
+          }
+        });
+      });
     });
   });
 });
